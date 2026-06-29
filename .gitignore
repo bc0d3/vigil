@@ -1,0 +1,8 @@
+# binario compilado
+/vigil
+# artefactos de test/cobertura
+*.out
+*.test
+coverage.out
+# salida de GoReleaser
+/dist

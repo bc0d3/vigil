@@ -1,0 +1,32 @@
+# golangci-lint v2 — https://golangci-lint.run
+version: "2"
+
+linters:
+  # 'standard' = errcheck, govet, ineffassign, staticcheck, unused
+  default: standard
+  enable:
+    - bodyclose
+    - gosec
+    - revive
+    - unconvert
+  settings:
+    errcheck:
+      # Escrituras a stdout/stderr cuyo error no es accionable.
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (net/http.ResponseWriter).Write
+  exclusions:
+    rules:
+      # Los tests no necesitan la misma severidad.
+      - path: _test\.go
+        linters:
+          - gosec
+          - errcheck
+          - unparam
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
