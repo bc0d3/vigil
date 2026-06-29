@@ -1,15 +1,16 @@
 # syntax=docker/dockerfile:1
 
 # --- build stage -------------------------------------------------------------
-FROM golang:1.23-alpine AS build
+FROM golang:1.25-alpine AS build
 
 # ca-certificates para copiarlas a la imagen final (scratch no trae ninguna).
 RUN apk add --no-cache ca-certificates
 
 WORKDIR /src
 
-# Sin dependencias externas: copiar go.mod basta para cachear.
-COPY go.mod ./
+# Cachear módulos: copiar go.mod/go.sum y descargar antes del código.
+COPY go.mod go.sum ./
+RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
 

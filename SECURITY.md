@@ -1,25 +1,25 @@
-# Política de seguridad
+# Security Policy
 
-## Reportar una vulnerabilidad
+## Reporting a vulnerability
 
-Si encontrás un problema de seguridad en Vigil, **no abras un issue público**.
-Usá los [Security Advisories](https://github.com/bc0d3/vigil/security/advisories/new)
-privados de GitHub para reportarlo.
+If you find a security issue in Vigil, **please do not open a public issue**. Use GitHub's
+private [Security Advisories](https://github.com/bc0d3/vigil/security/advisories/new) to
+report it. We aim to respond within 7 days.
 
-Hacemos lo posible por responder dentro de los 7 días.
+## Scope and responsible use
 
-## Alcance y uso responsable
+Vigil is a recon tool: it makes HTTP requests to whatever URLs you give it. Only use it
+against targets you are authorized to test (in-scope bug bounty programs, your own assets,
+labs).
 
-Vigil es una herramienta de recon: hace peticiones HTTP a las URLs que se le
-indiquen. Usala solo contra objetivos para los que tengas autorización
-(programas de bug bounty en alcance, tus propios activos, laboratorios).
+Relevant design notes:
 
-Notas de diseño relevantes:
-
-- `--insecure` desactiva la verificación de TLS. Es opt-in y solo para entornos
-  donde sabés lo que hacés.
-- Vigil respeta `HTTP_PROXY`/`HTTPS_PROXY` del entorno y sale por la red del
-  proceso/contenedor: corriéndolo en Docker dentro de una VPN, el tráfico queda
-  encapsulado ahí.
-- No ejecuta ni interpreta el contenido que descarga: solo lo hashea y lo
-  codifica en base64.
+- `--insecure` disables TLS verification. It is opt-in and only for environments where you
+  know what you are doing.
+- Vigil honors `HTTP_PROXY` / `HTTPS_PROXY` from the environment and exits through the
+  process/container's network: run it in Docker inside a VPN and the traffic stays there.
+- It never executes or interprets the content it downloads — it only hashes and base64-encodes it.
+- `vigil scan` writes nothing to disk. `vigil watch` does: it persists the URL, `sha256`
+  and metadata (status, size, content type, timestamps) to a local SQLite database or to the
+  DB you point it at with `--db-dsn`. **It does not store response bodies.** The default
+  SQLite file lives at `~/.vigil/vigil.db`.

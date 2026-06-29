@@ -1,35 +1,36 @@
-# Contribuir a Vigil
+# Contributing to Vigil
 
-¡Gracias por el interés! Vigil es deliberadamente chico: una responsabilidad,
-sin dependencias externas. Mantengamos eso.
+Thanks for your interest! Vigil is deliberately small: one job, done well. Let's keep it
+that way.
 
-## Antes de mandar un PR
+## Before opening a PR
 
 ```bash
 make check   # gofmt + go vet + go test -race
-make lint    # golangci-lint (opcional pero recomendado)
+make lint    # golangci-lint (optional but recommended)
 ```
 
-Todo tiene que quedar verde.
+Everything must be green.
 
-## Principios de diseño (no negociables)
+## Design principles (non-negotiable)
 
-1. **Solo stdlib.** No agregar dependencias a `go.mod`.
-2. **Salida = 1 línea JSON por recurso**, determinista, en snake_case.
-3. **Se hashea el contenido crudo**, nunca normalizado.
-4. **Un status HTTP no es un error.** Solo un fallo de red llena `error`.
+1. **The core (`scan` / `internal/fingerprint`) is stdlib-only and stateless.** No
+   dependencies and no disk I/O there. Persistence lives only in `internal/store` (used by
+   `watch`), where a small set of vetted, CGO-free dependencies is allowed.
+2. **Output = one JSON line per resource**, deterministic, snake_case.
+3. **The raw body is hashed**, never normalized.
+4. **An HTTP status is not an error.** Only a network failure fills `error`.
 
-Si tu cambio toca el contrato de salida, abrí primero un issue para discutirlo:
-hay consumidores automatizados que dependen de su estabilidad.
+If your change touches the output contract, open an issue first to discuss it: there are
+automated consumers that depend on its stability.
 
-## Estilo
+## Style
 
-- `gofmt` / `goimports` obligatorio.
-- Commits en estilo [Conventional Commits](https://www.conventionalcommits.org/)
-  (`feat:`, `fix:`, `docs:`, `test:`, `chore:`…). El changelog del release se
-  arma a partir de ellos.
+- `gofmt` / `goimports` required.
+- [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`,
+  `test:`, `chore:`…). The release changelog is built from them.
 
 ## Tests
 
-Todo cambio de comportamiento necesita un test con `httptest`. Mirá
-`main_test.go` como referencia.
+Any behavior change needs a test using `httptest`. See `internal/fingerprint/fingerprint_test.go`
+and `cmd/vigil/main_test.go` for reference.

@@ -6,3 +6,8 @@
 coverage.out
 # salida de GoReleaser
 /dist
+# bases de datos SQLite locales (estado de `vigil watch`)
+*.db
+*.db-wal
+*.db-shm
+/snapshots/
