@@ -35,5 +35,10 @@ LABEL org.opencontainers.image.title="vigil" \
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /vigil /vigil
 
+# Correr como no-root (uid:gid nobody). `scan` no escribe a disco, así que la
+# imagen funciona con --read-only y sin capabilities. 65534 es numérico a
+# propósito: scratch no tiene /etc/passwd para resolver un nombre.
+USER 65534:65534
+
 # Invocar con: docker run --rm <image> scan <url>
 ENTRYPOINT ["/vigil"]
