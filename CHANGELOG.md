@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-30
+
 ### Added
 - `--normalize` (opt-in): hashes the **canonicalized** body instead of the raw bytes, so the
   `sha256` ignores per-request noise (CSRF tokens, CSP nonces, dated HTML comments, whitespace).
@@ -58,6 +60,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 - Test suite using `httptest` and CI (test + lint + image build).
 - Release automation with GoReleaser (multi-platform binaries) and an image published to GHCR.
 
-[Unreleased]: https://github.com/bc0d3/vigil/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/bc0d3/vigil/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bc0d3/vigil/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bc0d3/vigil/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/bc0d3/vigil/releases/tag/v0.0.1

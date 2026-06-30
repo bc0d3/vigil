@@ -51,7 +51,7 @@ $ vigil scan https://example.com/main.js
 
 ```bash
 # example: Linux amd64
-curl -sSfL https://github.com/bc0d3/vigil/releases/latest/download/vigil_0.0.1_linux_amd64.tar.gz | tar -xz vigil
+curl -sSfL https://github.com/bc0d3/vigil/releases/latest/download/vigil_0.2.0_linux_amd64.tar.gz | tar -xz vigil
 sudo mv vigil /usr/local/bin/
 ```
 
