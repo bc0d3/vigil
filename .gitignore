@@ -11,6 +11,3 @@ coverage.out
 *.db-wal
 *.db-shm
 /snapshots/
-# herramientas locales de desarrollo (no se publican)
-/CLAUDE.md
-/.claude/
