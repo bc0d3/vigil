@@ -62,6 +62,7 @@ changelog:
 release:
   draft: false
   prerelease: auto
+  mode: replace
   footer: |
     ---
     Imagen Docker: `ghcr.io/bc0d3/vigil:{{ .Tag }}`
