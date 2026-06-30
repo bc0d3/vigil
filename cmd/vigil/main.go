@@ -88,12 +88,15 @@ Flags:
   -max-size N       max body bytes to read (default 5242880)
   -no-body          omit body_b64 from the output
   -insecure         skip TLS certificate verification
+  -normalize        hash the canonicalized body (ignore CSRF tokens, CSP
+                    nonces, dated comments, whitespace) instead of the raw bytes
   -ua STRING        User-Agent header value
   -H "K: V"         extra header (repeatable)
   -concurrency N    URLs scanned in parallel (default 1)
 
 Examples:
   vigil scan https://target.com/main.js
+  vigil scan https://target.com/ --normalize --no-body
   vigil scan -l urls.txt -concurrency 25 -o out.jsonl
   katana -u https://target.com -silent | vigil scan -
 `
@@ -116,7 +119,7 @@ Behavior:
   -all              also emit unchanged URLs
   -interval DUR     loop every DUR until SIGINT/SIGTERM (daemon mode)
   -concurrency N    URLs scanned in parallel (default 1)
-  (plus all scan flags: -timeout, -max-size, -no-body, -insecure, -ua, -H)
+  (plus all scan flags: -timeout, -max-size, -no-body, -insecure, -normalize, -ua, -H)
 
 Examples:
   vigil watch -l urls.txt
@@ -187,6 +190,7 @@ func runScan(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	maxSize := fs.Int64("max-size", fingerprint.DefaultMaxSize, "")
 	noBody := fs.Bool("no-body", false, "")
 	insecure := fs.Bool("insecure", false, "")
+	normalize := fs.Bool("normalize", false, "")
 	ua := fs.String("ua", "vigil/"+version, "")
 	concurrency := fs.Int("concurrency", 1, "")
 	var headers stringSlice
@@ -218,6 +222,7 @@ func runScan(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		MaxSize:   *maxSize,
 		NoBody:    *noBody,
 		Insecure:  *insecure,
+		Normalize: *normalize,
 		UserAgent: *ua,
 		Headers:   headers,
 	}
@@ -327,6 +332,7 @@ func runWatch(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	maxSize := fs.Int64("max-size", fingerprint.DefaultMaxSize, "")
 	noBody := fs.Bool("no-body", false, "")
 	insecure := fs.Bool("insecure", false, "")
+	normalize := fs.Bool("normalize", false, "")
 	ua := fs.String("ua", "vigil/"+version, "")
 	concurrency := fs.Int("concurrency", 1, "")
 	var headers stringSlice
@@ -377,6 +383,7 @@ func runWatch(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		MaxSize:   *maxSize,
 		NoBody:    *noBody,
 		Insecure:  *insecure,
+		Normalize: *normalize,
 		UserAgent: *ua,
 		Headers:   headers,
 	}

@@ -41,6 +41,7 @@ type Options struct {
 	MaxSize   int64
 	NoBody    bool
 	Insecure  bool
+	Normalize bool // hashea el cuerpo canonicalizado en vez del crudo (ver normalize.go)
 	UserAgent string
 	Headers   []string // cada una en formato "Clave: Valor"
 }
@@ -106,7 +107,14 @@ func Scan(url string, opts Options) Result {
 		res.Truncated = true
 	}
 
-	sum := sha256.Sum256(data)
+	// El hash se computa sobre el cuerpo crudo, salvo --normalize, que lo
+	// canonicaliza primero para ignorar ruido por-request. body_b64 y size
+	// siguen reflejando SIEMPRE los bytes crudos recibidos.
+	toHash := data
+	if opts.Normalize {
+		toHash = normalize(data)
+	}
+	sum := sha256.Sum256(toHash)
 	res.SHA256 = hex.EncodeToString(sum[:])
 	size := int64(len(data))
 	res.Size = &size
