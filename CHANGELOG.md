@@ -7,6 +7,18 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `--normalize` (opt-in): hashes the **canonicalized** body instead of the raw bytes, so the
+  `sha256` ignores per-request noise (CSRF tokens, CSP nonces, dated HTML comments, whitespace).
+  Eliminates false positives when watching dynamic HTML. The default stays raw; `body_b64` and
+  `size` always reflect the raw response.
+- Multi-arch (`amd64` + `arm64`) container images, pushed to GHCR on every `main` push
+  (tagged by commit `sha` + `latest`) and on every `vX.Y.Z` release.
+
+### Changed
+- Container image now runs as **non-root** (`USER 65534:65534`); works under `--read-only`,
+  `--cap-drop ALL` and `--security-opt no-new-privileges`.
+
 ## [0.1.0] - 2026-06-29
 
 ### Added

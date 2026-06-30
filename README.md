@@ -17,7 +17,8 @@
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
   <a href="#examples">Examples</a> •
-  <a href="#output">Output</a>
+  <a href="#output">Output</a> •
+  <a href="#use-in-noctra">Noctra</a>
 </p>
 
 ---
@@ -97,6 +98,7 @@ Usage:
 | `--max-size` | `5242880` (5 MiB) | max bytes to read; truncates and sets `truncated` if exceeded |
 | `--no-body` | `false` | omit `body_b64` from the output |
 | `--insecure` | `false` | skip TLS certificate verification |
+| `--normalize` | `false` | hash the **canonicalized** body instead of the raw bytes (see [Normalized hashing](#normalized-hashing-for-dynamic-html)) |
 | `--ua` | `vigil/<version>` | `User-Agent` header value |
 | `-H "K: V"` | — | extra header, repeatable |
 | `--concurrency` | `1` | URLs scanned in parallel (raise for big lists) |
@@ -203,6 +205,67 @@ One JSON line per resource (JSONL in batch), snake_case:
 **Key rule:** an HTTP status (404, 500) is **not** an error — it goes in `status`. Only a network
 failure fills `error` and returns exit code 1. This makes the output safe to consume programmatically:
 a hash is always a hash, never a disguised failure.
+
+> **`error` means "could not observe", not "changed to empty".** When a line carries `error`, no
+> response was seen, so `sha256`/`status`/`size` are absent. A consumer diffing fingerprints across
+> runs must treat such a line as *no observation this run* — never as a content change to an empty body.
+
+## Normalized hashing (for dynamic HTML)
+
+By default Vigil hashes the **raw** bytes — perfect for static assets (`main.js`, `robots.txt`,
+JSON), where the same content always yields the same `sha256`. But dynamic HTML often embeds
+per-request noise — a fresh CSRF token, a CSP `nonce`, a build timestamp in a comment — that
+changes the raw hash on every request and produces **permanent false positives**.
+
+`--normalize` canonicalizes the body **before** hashing so that noise is ignored:
+
+- collapses runs of whitespace,
+- drops CSRF `<meta>` tags and hidden `_token`/`csrf`/`authenticity_token` inputs,
+- strips CSP `nonce="…"` attributes,
+- removes HTML comments that contain a date (build stamps like `<!-- built 2026-06-29 -->`).
+
+```bash
+# raw: hash flips every request because of the rotating CSRF token (false positive)
+vigil scan https://app.target.com/login --no-body
+
+# normalized: stable hash; only a REAL content change moves it
+vigil scan https://app.target.com/login --normalize --no-body
+```
+
+`--normalize` only changes **what gets hashed**. `body_b64` and `size` always reflect the raw
+bytes as received, so you never lose the original response. The default stays raw — normalization
+is strictly opt-in.
+
+## Use in Noctra
+
+Vigil is a drop-in one-shot tool for [Noctra](https://github.com/bc0d3/noctra): it runs as an
+ephemeral container, scans a single URL, prints one JSON line to **stdout**, and exits. It needs
+no state on disk (`scan` never writes), runs fine as **non-root** under a **read-only rootfs**,
+and drops all capabilities.
+
+Register it with this `command_template`:
+
+```jsonc
+// static assets (JS / JSON / robots): raw hash is already deterministic
+["scan", "--no-body", "{{input}}"]
+
+// dynamic HTML: ignore per-request noise to avoid false positives
+["scan", "--normalize", "--no-body", "{{input}}"]
+```
+
+The parser consumes these fields: `url` (the value), `sha256`, `status`, `content_type`, `size`.
+`--no-body` keeps the line small (Noctra only needs the hash). Set **`needs_vpn: true`** if you want
+egress anonymized — Vigil has no proxy logic of its own; it inherits the network of its container,
+so running it behind a VPN sidecar (e.g. gluetun) anonymizes it for free.
+
+Container hardening it runs cleanly under:
+
+```bash
+docker run --rm \
+  --user 65534:65534 --read-only --cap-drop ALL \
+  --security-opt no-new-privileges --tmpfs /tmp \
+  ghcr.io/bc0d3/vigil:latest scan --no-body https://target.com/main.js
+```
 
 ## Development
 
