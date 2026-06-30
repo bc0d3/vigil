@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # --- build stage -------------------------------------------------------------
-FROM golang:1.25-alpine AS build
+FROM golang:1.26-alpine AS build
 
 # ca-certificates para copiarlas a la imagen final (scratch no trae ninguna).
 RUN apk add --no-cache ca-certificates
